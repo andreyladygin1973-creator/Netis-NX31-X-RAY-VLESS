@@ -65,6 +65,7 @@ This project is completely free and open-source. If this script saved you hours 
 [![USDT TRC-20](https://img.shields.io/badge/USDT%20TRC--20-Wallet-green?style=for-the-badge)](https://tronscan.org/#/address/TL8hBVPC3v99qfiwP6xmFN38kQHxpPXMw7)
 
 **YooMoney:** [https://yoomoney.ru/to/410011080637190/1000](https://yoomoney.ru/to/410011080637190/1000)
+
 **Crypto (USDT TRC-20):** `TL8hBVPC3v99qfiwP6xmFN38kQHxpPXMw7`
 
 ## 📄 License
