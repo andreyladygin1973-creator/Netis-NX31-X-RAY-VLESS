@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netis NX31: Кастомная прошивка и панель VLESS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #409EFF;
+            --primary-hover: #2e8de6;
+            --bg: #f1f4f6;
+            --text: #333333;
+            --text-light: #666666;
+            --white: #ffffff;
+            --border: #e9ecef;
+            --success: #05c9b1;
+            --warning: #f6c23e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #409EFF 0%, #0056b3 100%);
+            color: var(--white);
+            padding: 80px 20px;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 30px rgba(64, 158, 255, 0.2);
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--white);
+            color: var(--primary);
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            background-color: #f8f9fa;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: -40px auto 40px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        /* Requirements */
+        .requirements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .req-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .req-item h4 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .req-item p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Steps */
+        .step-list {
+            list-style: none;
+            position: relative;
+        }
+
+        .step-list::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .step-item {
+            position: relative;
+            padding-left: 70px;
+            margin-bottom: 35px;
+        }
+
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border: 4px solid var(--white);
+            box-shadow: 0 0 0 2px var(--primary);
+            z-index: 2;
+        }
+
+        .step-content h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .step-content p {
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #d63384;
+            font-size: 0.95em;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid var(--warning);
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #856404;
+        }
+        
+        .alert i {
+            margin-right: 8px;
+        }
+
+        /* Final block */
+        .final-note {
+            text-align: center;
+            padding: 20px;
+            background: #e8f4ff;
+            border-radius: 8px;
+            border: 1px dashed var(--primary);
+            margin-top: 20px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .card { padding: 20px; }
+            .step-list::before { left: 20px; }
+            .step-item { padding-left: 55px; }
+            .step-number { width: 40px; height: 40px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <h1>Кастомная прошивка Netis NX31</h1>
+        <p>Автоматизированная настройка Xray, панель управления VLESS и оптимизация роутера за пару кликов.</p>
+        <a href="nx31.zip" download class="btn-download">
+            <i class="fas fa-download"></i>
+            Скачать nx31.zip
+        </a>
+    </header>
+
+    <div class="container">
+        
+        <!-- Подготовка -->
+        <div class="card">
+            <h2><i class="fas fa-clipboard-list"></i> Что понадобится</h2>
+            <div class="requirements">
+                <div class="req-item">
+                    <h4>Windows PC</h4>
+                    <p>Компьютер, подключенный к роутеру по кабелю (LAN).</p>
+                </div>
+                <div class="req-item">
+                    <h4>PuTTY (plink.exe + pscp.exe)</h4>
+                    <p>Утилиты для SSH. Обязательно положите их в папку с архивом.</p>
+                </div>
+                <div class="req-item">
+                    <h4>VLESS-ссылка</h4>
+                    <p>Ссылка на подписку (https://...) или прямая VLESS-ссылка.</p>
+                </div>
+            </div>
+            <div class="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Важно:</strong> Роутер должен быть сброшен к заводским настройкам (или быть абсолютно новым). Пароль по умолчанию — <code>Test1234</code>.
+            </div>
+        </div>
+
+        <!-- Инструкция -->
+        <div class="card">
+            <h2><i class="fas fa-rocket"></i> Инструкция по установке</h2>
+            
+            <ul class="step-list">
+                <li class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Распакуйте архив</h3>
+                        <p>Распакуйте скачанный <code>nx31.zip</code> в любую папку. Убедитесь, что файлы <code>pscp.exe</code> и <code>plink.exe</code> лежат в этой же папке.</p>
+                    </div>
+                </li>
+
+                <li class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Настройте ссылку</h3>
+                        <p>Откройте файл <code>nx31.bat</code> через Блокнот. Найдите блок настроек и вставьте вашу подписку в <code>SUB_URL</code> или прямую ссылку в <code>DIRECT_URL</code>.</p>
+                    </div>
+                </li>
+
+                <li class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Запустите установку</h3>
+                        <p>Запустите <code>nx31.bat</code> двойным кликом. Скрипт сам скачает зависимости, настроит Xray, RedSocks и веб-интерфейс.</p>
+                    </div>
+                </li>
+
+                <li class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Подтвердите ключ (Только при 1-м запуске)</h3>
+                        <p>В черном окне консоли появится вопрос про "Store key in cache?". Введите <code>y</code> и нажмите <code>Enter</code>. Если вы обновляете роутер, нажмите <code>y</code> для обновления ключа.</p>
+                    </div>
+                </li>
+
+                <li class="step-item">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3>Дождитесь перезагрузки</h3>
+                        <p>В конце скрипт выдаст сообщение "DONE!" и отправит роутер в перезагрузку. Это займет 2-3 минуты.</p>
+                    </div>
+                </li>
+
+                <li class="step-item">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h3>Завершите настройку</h3>
+                        <p>Откройте браузер. Роутер предложит "Быстрые настройки" (выбор DHCP и пароль от Wi-Fi). Пройдите мастер до конца.</p>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="final-note">
+                <h3>Готово!</h3>
+                <p>Теперь панель управления доступна по адресу: <br>
+                <strong><a href="http://192.168.1.1/vless.html" target="_blank">http://192.168.1.1/vless.html</a></strong></p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Netis NX31 Custom Firmware &copy; 2026. Все действия вы выполняете на свой страх и риск.</p>
+    </footer>
+
+</body>
+</html>
