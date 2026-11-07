@@ -20,21 +20,28 @@ Do not run it blindly on other routers. If you are using a different device or a
 2. **Architecture:** Ensure the `xray` binary matches your CPU architecture (this repo assumes `aarch64`).
 3. **Web UI:** The HTML/JS files are tailored for the stock Netis web interface. If you use LuCI, the UI integration will not work out of the box.
 
+## 📋 Prerequisites
+
+To automate the deployment, this project uses official command-line tools from **PuTTY**: `plink.exe` (for SSH) and `pscp.exe` (for SFTP file transfer).
+
+* **Automatic:** You don't need to download them manually. The `nx31.bat` script will automatically fetch them from the [official PuTTY website](https://www.putty.org/) when you run it for the first time.
+* **Manual (if auto-download fails):** If your PC blocks PowerShell from downloading files, download `plink.exe` and `pscp.exe` (64-bit) manually and place them in the same folder as `nx31.bat`.
+
+*(Note: These executables are intentionally excluded from this repository via `.gitignore` for security and size reasons).*
+
 ## 🚀 How to Use (Windows)
 
 1. **Get your VLESS link:** Ensure you have a working VLESS Reality URI.
 2. **Configure the script:** Open `nx31.bat` in a text editor and replace the `DIRECT_URL` variable with your actual VLESS link.
 3. **Connect to the router:** Connect your PC to the Netis NX31 router via LAN or Wi-Fi.
-4. **Run the installer:** Double-click `nx31.bat`. The script will use `plink` and `pscp` to automatically:
-   * Configure `opkg` repositories.
-   * Upload all necessary scripts and configs.
-   * Run the setup (install packages, configure iptables, set up DoH).
-   * Reboot the router.
+4. **Run the installer:** Double-click `nx31.bat`. 
+   * *(First run)* The script will automatically download `plink.exe` and `pscp.exe` if they are missing.
+   * The script will then configure `opkg` repositories, upload all necessary scripts/configs, run the setup (install packages, configure iptables, set up DoH), and reboot the router.
 5. **Access the UI:** After 2–3 minutes, open your browser and go to `http://192.168.1.1/vless.html` to view the status or update your VLESS link.
 
 ## 📁 Project Structure
 
-* `nx31.bat` — The main Windows installer script (automates SSH/SFTP).
+* `nx31.bat` — The main Windows installer script (automates SSH/SFTP and downloads dependencies).
 * `setup.sh` — The core router setup script (runs on OpenWrt).
 * `firewall.user` — Persistent `iptables` rules for NAT, transparent proxy, and QUIC blocking.
 * `vless.cgi` / `vless.html` — Lightweight CGI web interface for management.

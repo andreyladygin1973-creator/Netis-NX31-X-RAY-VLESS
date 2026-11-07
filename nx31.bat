@@ -15,10 +15,31 @@ REM ====================================================================
 set "SUB_URL="
 set "DIRECT_URL=vless://YOUR_UUID_HERE@YOUR_SERVER_IP:443?encryption=none&...#MyServer"
 
-set PLINK=%~dp0plink.exe
-set PSCP=%~dp0pscp.exe
-
 cd /d "%~dp0"
+
+REM ====================================================================
+REM Автоматическая загрузка plink.exe и pscp.exe с официального сайта PuTTY
+REM ====================================================================
+set PLINK=plink.exe
+set PSCP=pscp.exe
+
+if not exist "%PLINK%" (
+    echo [INFO] plink.exe not found. Downloading from official PuTTY site...
+    powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe', 'plink.exe')"
+    if not exist "%PLINK%" (
+        echo [ERROR] Failed to download plink.exe. Please check your internet connection.
+        pause & exit /b 1
+    )
+)
+
+if not exist "%PSCP%" (
+    echo [INFO] pscp.exe not found. Downloading from official PuTTY site...
+    powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://the.earth.li/~sgtatham/putty/latest/w64/pscp.exe', 'pscp.exe')"
+    if not exist "%PSCP%" (
+        echo [ERROR] Failed to download pscp.exe. Please check your internet connection.
+        pause & exit /b 1
+    )
+)
 
 echo ===================================================
 echo   NX31 INSTALLER: Xray + VLESS + DoH
