@@ -1,2 +1,54 @@
-# Netis-NX31-X-RAY-VLESS
-A lightweight, memory-optimized OpenWrt setup for transparent VLESS/Reality tunneling via Xray. Designed for 256MB RAM routers, it fixes DNS/QUIC leaks, blocks UDP 443, and provides a minimalist CGI UI for easy management. Bypass DPI without crashing your router.
+# Netis NX31: Transparent VLESS/Reality Tunnel Setup
+
+A lightweight, memory-optimized OpenWrt setup script designed to create a transparent proxy tunnel using Xray (VLESS + Reality) and Redsocks. 
+
+This project was specifically built and optimized for the **Netis NX31** router (MediaTek MT7981, 256MB RAM, OpenWrt 21.02, ARM64), but the core concepts can be adapted for other low-spec OpenWrt devices.
+
+## 🌟 Key Features
+
+* **Transparent Proxy:** Redirects all TCP traffic from LAN clients through Xray without requiring any client-side configuration.
+* **Anti-QUIC Leak Protection:** Automatically blocks UDP 443 (QUIC) for LAN clients. This forces browsers (Chrome, Firefox, Opera) to fall back to TCP 443, preventing IP leaks and ensuring Cloudflare routes traffic through the correct proxy PoP.
+* **DNS over HTTPS (DoH):** Uses `https-dns-proxy` and cleans up stock vendor DNS bugs (removes the dead `127.0.0.1#5053` fallback) to prevent DNS leaks.
+* **Low RAM Optimized:** Runs the Go-based Xray binary with `GOMEMLIMIT=50MiB` and `GOGC=20` to prevent OOM (Out-Of-Memory) crashes on 256MB routers.
+* **Custom CGI Web UI:** Provides a lightweight `/cgi-bin/vless` interface to update VLESS links, manage subscriptions, and restart the service without rebooting the router.
+
+## ⚠️ Disclaimer & Compatibility
+
+**This script is highly customized for the Netis NX31 (or identical clones).** 
+Do not run it blindly on other routers. If you are using a different device or a standard OpenWrt build, you **must** adapt the following:
+1. **WAN Interface:** Change `eth1` to your actual WAN interface (e.g., `wan`, `pppoe-wan`) inside `firewall.user`.
+2. **Architecture:** Ensure the `xray` binary matches your CPU architecture (this repo assumes `aarch64`).
+3. **Web UI:** The HTML/JS files are tailored for the stock Netis web interface. If you use LuCI, the UI integration will not work out of the box.
+
+## 🚀 How to Use (Windows)
+
+1. **Get your VLESS link:** Ensure you have a working VLESS Reality URI.
+2. **Configure the script:** Open `nx31.bat` in a text editor and replace the `DIRECT_URL` variable with your actual VLESS link.
+3. **Connect to the router:** Connect your PC to the Netis NX31 router via LAN or Wi-Fi.
+4. **Run the installer:** Double-click `nx31.bat`. The script will use `plink` and `pscp` to automatically:
+   * Configure `opkg` repositories.
+   * Upload all necessary scripts and configs.
+   * Run the setup (install packages, configure iptables, set up DoH).
+   * Reboot the router.
+5. **Access the UI:** After 2–3 minutes, open your browser and go to `http://192.168.1.1/vless.html` to view the status or update your VLESS link.
+
+## 📁 Project Structure
+
+* `nx31.bat` — The main Windows installer script (automates SSH/SFTP).
+* `setup.sh` — The core router setup script (runs on OpenWrt).
+* `firewall.user` — Persistent `iptables` rules for NAT, transparent proxy, and QUIC blocking.
+* `vless.cgi` / `vless.html` — Lightweight CGI web interface for management.
+* `xray-updater.sh` / `xray-watchdog.sh` — Background scripts to update configs and keep Xray alive.
+* `config.template.json` — The Xray configuration template.
+
+## 🛡️ Security
+
+This repository uses a strict `.gitignore` to prevent the accidental upload of:
+* Your `urls.txt` (which contains your private VLESS UUID and server IP).
+* Executables (`plink.exe`, `pscp.exe`).
+* The heavy Xray binary.
+
+**Never commit your real VLESS links to a public repository.**
+
+## 📄 License
+This project is licensed under the MIT License.
