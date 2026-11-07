@@ -61,7 +61,7 @@ This repository uses a strict `.gitignore` to prevent the accidental upload of:
 ## ☕ Support the Project / Поддержать проект
 
 This project is completely free and open-source. If this script saved you hours of setup time, you can support its further development.
-*(Проект создавался на чистом энтузиазме. Если скрипт сэкономил вам время, вы можете отблагодарить автора)*
+*(Проект создавался на чистом энтузиазме. Если скрипт сэкономил Вам время, вы можете отблагодарить автора)*
 
 [![Donate via YooMoney](https://img.shields.io/badge/Donate-YooMoney-purple?style=for-the-badge)](https://yoomoney.ru/to/410011080637190/1000)
 
