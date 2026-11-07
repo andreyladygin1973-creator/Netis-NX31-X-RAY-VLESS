@@ -56,6 +56,16 @@ This repository uses a strict `.gitignore` to prevent the accidental upload of:
 * The heavy Xray binary.
 
 **Never commit your real VLESS links to a public repository.**
+## ☕ Support the Project / Поддержать проект
+
+This project is completely free and open-source. If this script saved you hours of setup time or helped bypass DPI, consider supporting its further development! 
+*(Проект создавался на чистом энтузиазме. Если скрипт сэкономил Вам время, вы можете отблагодарить автора)*
+
+[![Donate via YooMoney](https://img.shields.io/badge/Donate-YooMoney-purple?style=for-the-badge)](https://yoomoney.ru/to/410011080637190/1000)
+[![USDT TRC-20](https://img.shields.io/badge/USDT%20TRC--20-Wallet-green?style=for-the-badge)](https://tronscan.org/#/address/TL8hBVPC3v99qfiwP6xmFN38kQHxpPXMw7)
+
+**YooMoney:** [https://yoomoney.ru/to/410011080637190/1000](https://yoomoney.ru/to/410011080637190/1000)
+**Crypto (USDT TRC-20):** `TL8hBVPC3v99qfiwP6xmFN38kQHxpPXMw7`
 
 ## 📄 License
 This project is licensed under the MIT License.
