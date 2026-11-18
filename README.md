@@ -9,8 +9,24 @@ This project was specifically built and optimized for the **Netis NX31** router 
 * **Transparent Proxy:** Redirects TCP traffic from LAN clients through Xray for network analysis and testing.
 * **UDP/QUIC Handling:** Blocks UDP 443 to force browsers to fall back to TCP 443, ensuring consistent routing during configuration.
 * **DNS over HTTPS (DoH):** Uses `https-dns-proxy` and cleans up stock vendor DNS bugs (removes the dead `127.0.0.1#5053` fallback).
-* **Low RAM Optimized:** Runs the Go-based Xray binary with `GOMEMLIMIT=50MiB` and `GOGC=20` to prevent OOM (Out-Of-Memory) crashes on 256MB routers.
+* **Low RAM Optimized:** Runs the Go-based Xray binary with `GOMEMLIMIT=64MiB` and `GOGC=50` to prevent OOM (Out-Of-Memory) crashes on 256MB routers.
 * **Custom CGI Web UI:** Provides a lightweight `/cgi-bin/vless` interface to update configurations without rebooting the router.
+* **Self-healing chain (v2):** Every link of the `xray -> redsocks -> DoH -> firewall` chain is supervised and re-validated, not just the Xray process.
+
+## 🆕 Version 2 (November 2026)
+
+Version 2 is a reliability release, written after a field diagnosis of a router that kept "falling off the internet" while LAN stayed alive.
+
+* **Full-chain supervisor** (`xray-watchdog.sh`): instead of checking `pidof` only, it probes the real tunnel through SOCKS, the redsocks port, DNS resolution, the `REDSOCKS` iptables rules, the default route and uplink reachability. Restarts are capped at 30/hour.
+* **Atomic config updates:** the new config is validated with `xray -test`, written to `.new`, `sync`ed, and only then moved over `config.json`. The last good config is kept as `.bak` and restored automatically if the current one is broken.
+* **DNS fallback:** DoH stays first, but `1.1.1.1` is kept as a secondary resolver, so a dead DoH daemon no longer takes the whole internet down.
+* **Quiet logs:** `redsocks log_info=off` and `kernel.printk = 1 4 1 7` cut log noise by ~93% and keep OOM / kernel warnings readable in `dmesg`.
+* **Black box:** a compact state snapshot every 30 s in `/tmp/blackbox.log`, and a full snapshot in `/overlay/blackbox/` whenever the chain breaks — so the next failure has a cause, not a guess.
+* **`nx31-fix.sh`:** applies all of the above to an already installed router (idempotent) and tries to grow `/overlay` using free UBI blocks.
+* Fixed `vless.cgi` start/stop (`${WATCHDOG_FILE}.bak` was never expanded, so the buttons did nothing).
+* Consistent `GOGC=50` / `GOMEMLIMIT=64MiB` in every script.
+
+Version 1 is preserved in the [`v1/`](v1/) folder and as the `v1.0` git tag.
 
 ## ⚠️ Disclaimer & Compatibility
 
@@ -46,15 +62,24 @@ To automate the deployment, this project uses official command-line tools from *
 * `setup.sh` — The core router setup script (runs on OpenWrt).
 * `firewall.user` — Persistent `iptables` rules for NAT, transparent proxy, and UDP 443 handling.
 * `vless.cgi` / `vless.html` — Lightweight CGI web interface for management.
-* `xray-updater.sh` / `xray-watchdog.sh` — Background scripts to update configs and keep Xray alive.
+* `xray-updater.sh` — Builds the Xray config from a VLESS link or subscription (atomic writes since v2).
+* `xray-watchdog.sh` — Supervisor of the whole chain (v2: health probes instead of `pidof`).
+* `nx31-fix.sh` — Idempotent hardening script for an already installed router (v2).
 * `config.template.json` — The Xray configuration template.
+* `v1/` — Archived version 1 scripts, see [`v1/README.md`](v1/README.md).
 
 ## 🛡️ Security
 
 This repository uses a strict `.gitignore` to prevent the accidental upload of:
 * Your `urls.txt` (which contains your private VLESS UUID and server IP).
 * Executables (`plink.exe`, `pscp.exe`).
-* The heavy Xray binary.
+* Your live Xray config (`config.json`).
+
+All values in this repository are placeholders:
+
+* `203.0.113.10` — documentation IP (RFC 5737), replace with your server address;
+* `YOUR_ROUTER_PASSWORD` — replace with your router password;
+* `vless://YOUR_UUID_HERE@YOUR_SERVER_IP:443?...` — replace with your own link.
 
 **Never commit your real VLESS links to a public repository.**
 

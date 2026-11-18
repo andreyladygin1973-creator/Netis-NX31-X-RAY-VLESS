@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>VLESS Updater</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=yes, viewport-fit=cover">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <script src="/js/publicPlugin/jquery.min.js"></script>
+    <script src="/js/publicPlugin/bootstrap.min.js"></script>
+    <style>
+        body { background: #f1f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 0; }
+        
+        /* Исправленный хедер */
+        #header { background: #409EFF; min-height: 65px; padding: 0 3%; display: flex; align-items: center; box-sizing: border-box; }
+        .header-left { display: flex; align-items: center; gap: 40px; } /* Группируем лого и меню */
+        .logo-group { display: flex; align-items: center; gap: 15px; }
+        #header .logo { height: 22px; }
+        #header .nav-links { display: flex; gap: 20px; align-items: center; }
+        #header .nav-links a { color: #eff3f6; text-decoration: none; font-size: 15px; padding: 8px 4px; }
+        #header .nav-links a.active { color: #fff; border-bottom: 2px solid #fff; }
+        
+        .container-list { padding: 20px 15px; }
+        .panel { border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border: none; margin-bottom: 20px; }
+        .panel-heading { padding: 12px 18px; background: #f7f9fa; border-radius: 8px 8px 0 0 !important; border-bottom: 1px solid #e9ecef; }
+        .panel-title { margin: 0; font-size: 16px; font-weight: 600; color: #333; }
+        .panel-body { padding: 18px; }
+        .btn-primary { background: #409EFF; border-color: #409EFF; }
+        .btn-primary:hover { background: #2e8de6; }
+        .btn-success { background: #05c9b1; border-color: #05c9b1; }
+        .btn-success:hover { background: #04b3a0; }
+        .btn-danger { background: #dc3545; border-color: #dc3545; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; color: #fff; font-size: 13px; margin-left: 10px; }
+        .bg-running { background: #05c9b1; }
+        .bg-stopped { background: #dc3545; }
+        .form-control { border-radius: 4px; height: 38px; }
+        code { word-break: break-all; background: #f5f5f5; padding: 8px 10px; display: block; border-radius: 4px; color: #333; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div class="header-left">
+            <div class="logo-group">
+                <img src="/images/logo.png" class="logo" alt="Netis" onerror="this.style.display='none'">
+                <span style="color:#fff; font-size:18px; font-weight:500;">NX31</span>
+            </div>
+            <div class="nav-links">
+                <a href="/index.html">Главная</a>
+                <a href="/network.html">Сеть</a>
+                <a href="/application.html">Приложения</a>
+                <a href="/system.html">Инструменты</a>
+                <a href="/vless.html" class="active">VLESS</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-list">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div id="alert-box"></div>
+
+                <div class="panel">
+                    <div class="panel-heading" style="display:flex; align-items:center; justify-content:space-between;">
+                        <h3 class="panel-title">Управление службой Xray</h3>
+                        <span id="xray-status" class="status-badge bg-stopped">Проверка...</span>
+                    </div>
+                    <div class="panel-body">
+                        <p style="margin-top:0;">Ручной запуск или остановка службы Xray.</p>
+                        <button type="button" class="btn btn-success" id="btn-start-xray" disabled>Запустить Xray</button>
+                        <button type="button" class="btn btn-danger" id="btn-stop-xray" disabled>Остановить Xray</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Управление подпиской</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label>Текущая ссылка подписки:</label>
+                            <code id="current-sub">Загрузка...</code>
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <label for="new-sub">Новая ссылка подписки:</label>
+                            <input type="text" class="form-control" id="new-sub" placeholder="https://...">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="save-sub-btn">Сохранить подписку</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Прямая VLESS-ссылка</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label>Текущая прямая ссылка:</label>
+                            <code id="current-vless">Загрузка...</code>
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <label for="new-vless">Новая VLESS-ссылка:</label>
+                            <input type="text" class="form-control" id="new-vless" placeholder="vless://...">
+                        </div>
+                        <button type="button" class="btn btn-success" id="save-vless-btn">Сохранить VLESS-ссылку</button>
+                        <p class="help-block" style="margin-top:10px; font-size:12px; color:#999;">* Сохранение прямой ссылки отключит автообновление по подписке.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var current_html = "vless";
+
+    $(document).ready(function() {
+        function loadData() {
+            $.ajax({
+                url: '/cgi-bin/vless',
+                type: 'GET',
+                dataType: 'json',
+                success: function(r) {
+                    if (r.status === 'success') {
+                        $('#current-sub').text(r.sub_url || 'Не задана (используется прямая ссылка)');
+                        $('#current-vless').text(r.direct_url || 'Не задана (используется подписка)');
+                        updateXrayUI(r.xray);
+                    } else {
+                        $('#current-sub').text('Ошибка чтения конфига');
+                        $('#current-vless').text('Ошибка чтения конфига');
+                    }
+                },
+                error: function() {
+                    $('#current-sub').text('Ошибка соединения с CGI');
+                    $('#current-vless').text('Ошибка соединения с CGI');
+                }
+            });
+        }
+
+        function updateXrayUI(status) {
+            var $b = $('#xray-status'), $s = $('#btn-start-xray'), $t = $('#btn-stop-xray');
+            if (status === 'running') {
+                $b.removeClass('bg-stopped').addClass('bg-running').text('Работает');
+                $s.prop('disabled', true);
+                $t.prop('disabled', false);
+            } else {
+                $b.removeClass('bg-running').addClass('bg-stopped').text('Остановлен');
+                $s.prop('disabled', false);
+                $t.prop('disabled', true);
+            }
+        }
+
+        function showAlert(type, msg) {
+            $('#alert-box').html('<div class="alert alert-'+type+' alert-dismissible" role="alert">'+
+                '<button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>'+msg+'</div>');
+        }
+
+        loadData();
+
+        $('#btn-stop-xray').click(function() {
+            if(!confirm('Остановить Xray? Соединение прервется.')) return;
+            var b = $(this); b.prop('disabled', true).text('Остановка...');
+            $.ajax({url:'/cgi-bin/vless', type:'POST', data:{ACTION:'stop'}, dataType:'json',
+                success:function(r){
+                    if(r.status==='success'){ showAlert('success', r.message); updateXrayUI('stopped'); }
+                    else { showAlert('danger', r.message); b.prop('disabled', false).text('Остановить Xray'); }
+                },
+                error:function(){ showAlert('danger','Ошибка запроса.'); b.prop('disabled', false).text('Остановить Xray'); }
+            });
+        });
+
+        $('#btn-start-xray').click(function() {
+            var b = $(this); b.prop('disabled', true).text('Запуск...');
+            $.ajax({url:'/cgi-bin/vless', type:'POST', data:{ACTION:'start'}, dataType:'json',
+                success:function(r){
+                    if(r.status==='success'){ showAlert('success', r.message); setTimeout(function(){ updateXrayUI('running'); },500); }
+                    else { showAlert('danger', r.message); b.prop('disabled', false).text('Запустить Xray'); }
+                },
+                error:function(){ showAlert('danger','Ошибка запроса.'); b.prop('disabled', false).text('Запустить Xray'); }
+            });
+        });
+
+        $('#save-sub-btn').click(function() {
+            var url = $('#new-sub').val().trim();
+            if(!url){ showAlert('danger','Вставьте ссылку подписки.'); return; }
+            var b = $(this); b.prop('disabled', true).text('Обновление...');
+            $.ajax({url:'/cgi-bin/vless', type:'POST', data:{SUB_URL:url}, dataType:'json',
+                success:function(r){
+                    if(r.status==='success'){ showAlert('success', r.message); $('#new-sub').val(''); loadData(); }
+                    else { showAlert('danger', r.message); }
+                    b.prop('disabled', false).text('Сохранить подписку');
+                },
+                error:function(){ showAlert('danger','Ошибка запроса.'); b.prop('disabled', false).text('Сохранить подписку'); }
+            });
+        });
+
+        $('#save-vless-btn').click(function() {
+            var url = $('#new-vless').val().trim();
+            if(!url){ showAlert('danger','Вставьте VLESS-ссылку.'); return; }
+            var b = $(this); b.prop('disabled', true).text('Обновление...');
+            $.ajax({url:'/cgi-bin/vless', type:'POST', data:{VLESS_URL:url}, dataType:'json',
+                success:function(r){
+                    if(r.status==='success'){ showAlert('success', r.message); $('#new-vless').val(''); loadData(); }
+                    else { showAlert('danger', r.message); }
+                    b.prop('disabled', false).text('Сохранить VLESS-ссылку');
+                },
+                error:function(){ showAlert('danger','Ошибка запроса.'); b.prop('disabled', false).text('Сохранить VLESS-ссылку'); }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

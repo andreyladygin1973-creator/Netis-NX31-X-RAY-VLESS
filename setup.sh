@@ -17,7 +17,7 @@ echo "Creating redsocks config..."
 cat > /etc/redsocks.conf << 'EOF'
 base {
     log_debug = off;
-    log_info = on;
+    log_info = off;
     daemon = on;
     redirector = iptables;
 }
@@ -87,7 +87,7 @@ iptables -t nat -A REDSOCKS -d 172.16.0.0/12 -j RETURN
 iptables -t nat -A REDSOCKS -d 192.168.0.0/16 -j RETURN
 iptables -t nat -A REDSOCKS -d 224.0.0.0/4 -j RETURN
 iptables -t nat -A REDSOCKS -d 240.0.0.0/4 -j RETURN
-iptables -t nat -A REDSOCKS -d 78.17.171.64 -j RETURN
+iptables -t nat -A REDSOCKS -d 203.0.113.10 -j RETURN
 iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports 12345
 
 # ==========================================
@@ -117,12 +117,12 @@ iptables -t nat -A PREROUTING -i br-lan -j REDSOCKS
 # 3. Сам роутер (OUTPUT)
 # ==========================================
 # Очищаем только наши правила, не ломая нативные цепочки fw3
-while iptables -t nat -D OUTPUT -d 78.17.171.64 -j RETURN 2>/dev/null; do :; done
+while iptables -t nat -D OUTPUT -d 203.0.113.10 -j RETURN 2>/dev/null; do :; done
 for ip in 1.1.1.1 8.8.8.8 9.9.9.9; do
     while iptables -t nat -D OUTPUT -d $ip -p tcp --dport 443 -j REDSOCKS 2>/dev/null; do :; done
     iptables -t nat -A OUTPUT -d $ip -p tcp --dport 443 -j REDSOCKS
 done
-iptables -t nat -I OUTPUT 1 -d 78.17.171.64 -j RETURN
+iptables -t nat -I OUTPUT 1 -d 203.0.113.10 -j RETURN
 
 # MSS Clamping
 iptables -t mangle -C FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu 2>/dev/null || \
@@ -158,8 +158,8 @@ if [ ! -f /tmp/xray ]; then
     fi
 fi
 
-export GOGC=20
-export GOMEMLIMIT=50MiB
+export GOGC=50
+export GOMEMLIMIT=64MiB
 
 # 2. Запуск Xray (только если еще не запущен)
 if ! pidof xray >/dev/null 2>&1; then
@@ -257,5 +257,16 @@ if [ -f /tmp/urls.txt ]; then
     sed -i "s|^SUB_URL=.*|SUB_URL=\"$ESC_SUB\"|" /etc/xray-updater.sh
     sed -i "s|^DIRECT_URL=.*|DIRECT_URL=\"$ESC_DIR\"|" /etc/xray-updater.sh
 fi
+
+echo "Applying hardening (overlay grow, quiet logs, DNS fallback, supervisor)..."
+if [ -f /tmp/nx31-fix.sh ]; then
+    mv /tmp/nx31-fix.sh /etc/nx31-fix.sh
+    chmod +x /etc/nx31-fix.sh
+    sh /etc/nx31-fix.sh
+else
+    echo "WARNING: /tmp/nx31-fix.sh not found - skipping hardening"
+fi
+
+sync
 
 echo "Setup complete! (reboot to activate rc.local)"

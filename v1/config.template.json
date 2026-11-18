@@ -1,0 +1,41 @@
+{
+  "log": { "loglevel": "error" },
+  "inbounds": [
+    {
+      "port": 1080,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": { "auth": "noauth", "udp": true },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+    }
+  ],
+  "outbounds": [
+    "__OUTBOUND_PLACEHOLDER__",
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "domain": [
+          "domain:ru", "domain:su", "domain:vk.com", "domain:userapi.com",
+          "domain:vkuservideo.net", "domain:yastatic.net", "domain:yandex.net",
+          "domain:mycdn.me", "domain:imgsmail.ru", "domain:wbbasket.ru",
+          "domain:wbcscdn.ru", "domain:sber.com", "domain:ozon.com",
+          "domain:rutube.ru", "domain:avito.ru",
+          "domain:gosuslugi.ru", "domain:mail.ru", "domain:localhost"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": ["127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
+        "outboundTag": "direct"
+      }
+    ]
+  }
+}

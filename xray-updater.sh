@@ -7,6 +7,10 @@ TMP_SUB="/tmp/xray_sub.txt"
 TMP_JSON="/tmp/xray_new_config.json"
 LOG_TAG="xray-updater"
 
+# Сериализация: rc.local, веб-интерфейс и супервизор не должны обновлять конфиг одновременно
+exec 9>/tmp/xray-update.lock
+flock -n 9 2>/dev/null || { logger -t "$LOG_TAG" "Обновление уже выполняется, выход"; exit 0; }
+
 if [ -n "$DIRECT_URL" ]; then
     URI="$DIRECT_URL"
 else
@@ -142,7 +146,10 @@ OUTBOUND=$(echo "$OUTBOUND" | tr -d '\n')
 
 sed "s|\"__OUTBOUND_PLACEHOLDER__\"|$OUTBOUND|" "$TEMPLATE" > "$TMP_JSON"
 
-TEST_OUT=$(/tmp/xray -test -c "$TMP_JSON" 2>&1)
+XRAY_BIN=/tmp/xray
+[ -x "$XRAY_BIN" ] || XRAY_BIN=/etc/xray/xray
+
+TEST_OUT=$("$XRAY_BIN" -test -c "$TMP_JSON" 2>&1)
 if [ $? -ne 0 ]; then
     logger -t "$LOG_TAG" "Ошибка конфига: $TEST_OUT"
     exit 1
@@ -150,11 +157,20 @@ fi
 
 if cmp -s "$TMP_JSON" "$TARGET"; then exit 0; fi
 
-cp "$TMP_JSON" "$TARGET"
+# Бэкап последнего рабочего конфига (для отката супервизором)
+cp "$TARGET" "$TARGET.bak" 2>/dev/null
+
+# Атомарная запись: пишем в .new, sync, затем mv — иначе обрыв питания
+# посреди cp оставляет обрезанный config.json и Xray не стартует.
+cp "$TMP_JSON" "$TARGET.new" 2>/dev/null || { logger -t "$LOG_TAG" "Нет места для записи конфига"; exit 1; }
+sync
+mv "$TARGET.new" "$TARGET" || { logger -t "$LOG_TAG" "Не удалось применить конфиг"; exit 1; }
+sync
+
 killall xray 2>/dev/null
 sleep 1
-export GOGC=20
-export GOMEMLIMIT=50MiB
-start-stop-daemon -S -b -x /tmp/xray -- -c "$TARGET"
+export GOGC="${GOGC:-50}"
+export GOMEMLIMIT="${GOMEMLIMIT:-64MiB}"
+start-stop-daemon -S -b -x "$XRAY_BIN" -- -c "$TARGET"
 logger -t "$LOG_TAG" "Конфиг обновлён, Xray перезапущен"
 exit 0

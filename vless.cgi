@@ -20,7 +20,11 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
     ACTION=$(printf '%s' "$POST_DATA" | tr '&' '\n' | grep '^ACTION=' | head -1 | cut -d= -f2-)
 
     if [ "$ACTION" = "stop" ]; then
-        [ -f "$WATCHDOG_FILE" ] && mv "$WATCHDOG_FILE" "${WATCHDOG_FILE}.bak"
+        [ -f "$WATCHDOG_FILE" ] && mv "$WATCHDOG_FILE" "$WATCHDOG_FILE.bak"
+        # Гасим и сам супервизор, иначе он тут же поднимет Xray обратно
+        for pid in $(ps w 2>/dev/null | awk '/[x]ray-watchdog\.sh/{print $1}'); do
+            kill "$pid" 2>/dev/null
+        done
         killall xray 2>/dev/null
         sleep 1
         if pidof xray >/dev/null 2>&1; then
@@ -34,14 +38,17 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
         fi
         exit 0
     elif [ "$ACTION" = "start" ]; then
-        [ -f "${WATCHDOG_FILE}.bak" ] && mv "${WATCHDOG_FILE}.bak" "$WATCHDOG_FILE"
+        [ -f "$WATCHDOG_FILE.bak" ] && mv "$WATCHDOG_FILE.bak" "$WATCHDOG_FILE"
         if ! "$XRAY_BIN" -test -c "$XRAY_CONF" >/dev/null 2>&1; then
             echo '{"status":"error","message":"Конфиг битый — Xray не запущен."}'
             exit 0
         fi
-        export GOGC=20; export GOMEMLIMIT=50MiB
+        export GOGC=50; export GOMEMLIMIT=64MiB
         start-stop-daemon -S -b -x "$XRAY_BIN" -- -c "$XRAY_CONF"
         sleep 1
+        if ! ps w 2>/dev/null | grep -q '[/]etc/xray-watchdog.sh'; then
+            start-stop-daemon -S -b -x "$WATCHDOG_FILE" 2>/dev/null
+        fi
         if pidof xray >/dev/null 2>&1; then
             echo '{"status":"success","message":"Xray запущен."}'
         else

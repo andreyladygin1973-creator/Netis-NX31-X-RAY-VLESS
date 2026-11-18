@@ -5,12 +5,12 @@ color 0A
 
 set ROUTER_IP=192.168.1.1
 set USER=admin
-set PASS=Test1234
+set PASS=YOUR_ROUTER_PASSWORD
 set ROUTER=%USER%@%ROUTER_IP%
 
 REM ====================================================================
-REM  ÂÀÆÍÎ: áåç ïàðàìåòðà support-x25519mlkem768=true,
-REM  èíà÷å áóäåò "remote error: tls: illegal parameter"
+REM  Ð’ÐÐ–ÐÐž: Ð±ÐµÐ· Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð° support-x25519mlkem768=true,
+REM  Ð¸Ð½Ð°Ñ‡Ðµ Ð±ÑƒÐ´ÐµÑ‚ "remote error: tls: illegal parameter"
 REM ====================================================================
 set "SUB_URL="
 set "DIRECT_URL=vless://YOUR_UUID_HERE@YOUR_SERVER_IP:443?encryption=none&...#MyServer"
@@ -18,7 +18,7 @@ set "DIRECT_URL=vless://YOUR_UUID_HERE@YOUR_SERVER_IP:443?encryption=none&...#My
 cd /d "%~dp0"
 
 REM ====================================================================
-REM Àâòîìàòè÷åñêàÿ çàãðóçêà plink.exe è pscp.exe ñ îôèöèàëüíîãî ñàéòà PuTTY
+REM ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ°Ñ Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° plink.exe Ð¸ pscp.exe Ñ Ð¾Ñ„Ð¸Ñ†Ð¸Ð°Ð»ÑŒÐ½Ð¾Ð³Ð¾ ÑÐ°Ð¹Ñ‚Ð° PuTTY
 REM ====================================================================
 set PLINK=plink.exe
 set PSCP=pscp.exe
@@ -77,17 +77,17 @@ echo "SUB_URL=%SUB_URL%"
 echo "DIRECT_URL=%DIRECT_URL%"
 ) > urls.txt
 
-"%PSCP%" -batch -pw %PASS% xray config.template.json xray-updater.sh xray-watchdog.sh setup.sh header.js urls.txt %ROUTER%:/tmp/
+"%PSCP%" -batch -pw %PASS% xray config.template.json xray-updater.sh xray-watchdog.sh nx31-fix.sh setup.sh header.js urls.txt %ROUTER%:/tmp/
 "%PSCP%" -batch -pw %PASS% vless.html vless.cgi %ROUTER%:/tmp/
 
 echo [4/6] Fixing Windows line endings...
-"%PLINK%" -batch -pw %PASS% %ROUTER% "sed -i 's/\r//' /tmp/setup.sh /tmp/xray-updater.sh /tmp/xray-watchdog.sh /tmp/config.template.json /tmp/vless.html /tmp/vless.cgi /tmp/header.js /tmp/urls.txt"
+"%PLINK%" -batch -pw %PASS% %ROUTER% "sed -i 's/\r//' /tmp/setup.sh /tmp/xray-updater.sh /tmp/xray-watchdog.sh /tmp/nx31-fix.sh /tmp/config.template.json /tmp/vless.html /tmp/vless.cgi /tmp/header.js /tmp/urls.txt"
 
 echo [5/6] Running setup on router...
 "%PLINK%" -batch -pw %PASS% %ROUTER% "sh /tmp/setup.sh"
 
 echo [6/6] Rebooting...
-"%PLINK%" -batch -pw %PASS% %ROUTER% "reboot"
+"%PLINK%" -batch -pw %PASS% %ROUTER% "sync; reboot"
 
 echo.
 echo ===================================================
