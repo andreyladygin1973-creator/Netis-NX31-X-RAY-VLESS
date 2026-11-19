@@ -169,8 +169,8 @@ sync
 
 killall xray 2>/dev/null
 sleep 1
-export GOGC="${GOGC:-50}"
-export GOMEMLIMIT="${GOMEMLIMIT:-64MiB}"
+export GOGC="${GOGC:-40}"
+export GOMEMLIMIT="${GOMEMLIMIT:-40MiB}"
 start-stop-daemon -S -b -x "$XRAY_BIN" -- -c "$TARGET"
 logger -t "$LOG_TAG" "Конфиг обновлён, Xray перезапущен"
 exit 0

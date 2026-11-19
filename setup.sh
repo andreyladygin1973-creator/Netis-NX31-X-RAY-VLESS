@@ -158,8 +158,8 @@ if [ ! -f /tmp/xray ]; then
     fi
 fi
 
-export GOGC=50
-export GOMEMLIMIT=64MiB
+export GOGC=40
+export GOMEMLIMIT=40MiB
 
 # 2. Запуск Xray (только если еще не запущен)
 if ! pidof xray >/dev/null 2>&1; then

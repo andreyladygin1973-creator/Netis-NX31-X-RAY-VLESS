@@ -43,7 +43,7 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
             echo '{"status":"error","message":"Конфиг битый — Xray не запущен."}'
             exit 0
         fi
-        export GOGC=50; export GOMEMLIMIT=64MiB
+        export GOGC=40; export GOMEMLIMIT=40MiB
         start-stop-daemon -S -b -x "$XRAY_BIN" -- -c "$XRAY_CONF"
         sleep 1
         if ! ps w 2>/dev/null | grep -q '[/]etc/xray-watchdog.sh'; then

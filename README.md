@@ -9,7 +9,7 @@ This project was specifically built and optimized for the **Netis NX31** router 
 * **Transparent Proxy:** Redirects TCP traffic from LAN clients through Xray for network analysis and testing.
 * **UDP/QUIC Handling:** Blocks UDP 443 to force browsers to fall back to TCP 443, ensuring consistent routing during configuration.
 * **DNS over HTTPS (DoH):** Uses `https-dns-proxy` and cleans up stock vendor DNS bugs (removes the dead `127.0.0.1#5053` fallback).
-* **Low RAM Optimized:** Runs the Go-based Xray binary with `GOMEMLIMIT=64MiB` and `GOGC=50` to prevent OOM (Out-Of-Memory) crashes on 256MB routers.
+* **Low RAM Optimized:** Runs the Go-based Xray binary with `GOMEMLIMIT=40MiB` and `GOGC=40` to prevent OOM (Out-Of-Memory) crashes on 256MB routers.
 * **Custom CGI Web UI:** Provides a lightweight `/cgi-bin/vless` interface to update configurations without rebooting the router.
 * **Self-healing chain (v2):** Every link of the `xray -> redsocks -> DoH -> firewall` chain is supervised and re-validated, not just the Xray process.
 
@@ -24,7 +24,8 @@ Version 2 is a reliability release, written after a field diagnosis of a router 
 * **Black box:** a compact state snapshot every 30 s in `/tmp/blackbox.log`, and a full snapshot in `/overlay/blackbox/` whenever the chain breaks — so the next failure has a cause, not a guess.
 * **`nx31-fix.sh`:** applies all of the above to an already installed router (idempotent) and tries to grow `/overlay` using free UBI blocks.
 * Fixed `vless.cgi` start/stop (`${WATCHDOG_FILE}.bak` was never expanded, so the buttons did nothing).
-* Consistent `GOGC=50` / `GOMEMLIMIT=64MiB` in every script.
+* **OOM-safe defaults:** `GOGC=40` / `GOMEMLIMIT=40MiB` and a supervisor that survives an OOM kill — on a 231 MB router the kernel otherwise picks Xray as the largest allocation and the tunnel dies silently.
+* Consistent `GOGC=40` / `GOMEMLIMIT=40MiB` in every script.
 
 Version 1 is preserved in the [`v1/`](v1/) folder and as the `v1.0` git tag.
 

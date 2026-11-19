@@ -20,8 +20,8 @@ cd /d "%~dp0"
 REM ====================================================================
 REM Автоматическая загрузка plink.exe и pscp.exe с официального сайта PuTTY
 REM ====================================================================
-set PLINK=plink.exe
-set PSCP=pscp.exe
+set PLINK=%~dp0plink.exe
+set PSCP=%~dp0pscp.exe
 
 if not exist "%PLINK%" (
     echo [INFO] plink.exe not found. Downloading from official PuTTY site...
@@ -48,7 +48,7 @@ echo Please wait (3-5 minutes)...
 
 echo [0/6] Checking connection and host key...
 echo [!] IF THIS IS A NEW ROUTER: type "y" and press Enter.
-"%PLINK%" -ssh -l %USER% -pw %PASS% %ROUTER_IP% "exit" >nul 2>&1
+"%PLINK%" -ssh -l %USER% -pw %PASS% %ROUTER_IP% "exit"
 if errorlevel 1 (
     echo ERROR: Cannot connect. Check IP/password, or manually accept the host key.
     pause & exit /b 1

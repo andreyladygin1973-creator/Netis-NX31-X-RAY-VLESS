@@ -14,8 +14,8 @@ BB_DIR=/overlay/blackbox
 LOCK=/tmp/supervisor.lock
 CNT=/tmp/supervisor.restarts
 
-export GOGC="${GOGC:-50}"
-export GOMEMLIMIT="${GOMEMLIMIT:-64MiB}"
+export GOGC="${GOGC:-40}"
+export GOMEMLIMIT="${GOMEMLIMIT:-40MiB}"
 
 log() {
     logger -t xray-sup "$*" 2>/dev/null
