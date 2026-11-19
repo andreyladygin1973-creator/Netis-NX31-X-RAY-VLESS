@@ -20,6 +20,13 @@ base {
     log_info = off;
     daemon = on;
     redirector = iptables;
+
+    // По умолчанию conn_max = (rlimit_nofile - rlimit_nofile/4) / 6,
+    // то есть 128 при rlimit 1024. Каждый splice-коннект держит 6 дескрипторов,
+    // поэтому 128 мало: поднимаем rlimit и задаём лимит явно (2048 -> 256).
+    rlimit_nofile         = 2048;
+    redsocks_conn_max     = 256;
+    connpres_idle_timeout = 10;
 }
 redsocks {
     local_ip = 0.0.0.0;
