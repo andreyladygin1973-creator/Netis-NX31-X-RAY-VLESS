@@ -108,7 +108,24 @@ restart_xray() {
 
 restart_redsocks() {
     log "redsocks: restart"
-    /etc/init.d/redsocks restart >/dev/null 2>&1
+    # init-скрипт делает stop без ожидания: старый процесс ещё держит :12345,
+    # и новый падает с EADDRINUSE (SO_REUSEADDR в redsocks не выставлен).
+    # Поэтому останавливаем, ждём освобождения порта и только потом стартуем.
+    /etc/init.d/redsocks stop >/dev/null 2>&1
+
+    i=0
+    while [ $i -lt 10 ] && netstat -ltn 2>/dev/null | grep -q ':12345 '; do
+        sleep 1
+        i=$((i + 1))
+    done
+
+    if pidof redsocks >/dev/null 2>&1; then
+        log "redsocks: port still busy after ${i}s, killing"
+        killall -9 redsocks >/dev/null 2>&1
+        sleep 1
+    fi
+
+    /etc/init.d/redsocks start >/dev/null 2>&1
 }
 
 restart_doh() {
