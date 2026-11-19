@@ -179,8 +179,19 @@ dump_blackbox() {
 
 # ---------- основной цикл ----------
 
-exec 9> "$LOCK" 2>/dev/null
-flock -n 9 2>/dev/null || { log "another supervisor instance is running, exit"; exit 0; }
+# Защита от второго экземпляра.
+# flock здесь не годится: дочерние процессы (sleep/curl) наследуют fd блокировки,
+# и после kill супервизора осиротевший ребёнок держит лок до своего завершения —
+# новый экземпляр не может стартовать. Поэтому pidfile + проверка cmdline.
+if [ -f "$LOCK" ]; then
+    old=$(cat "$LOCK" 2>/dev/null)
+    if [ -n "$old" ] && [ "$old" != "$$" ] && kill -0 "$old" 2>/dev/null \
+       && grep -q 'xray-watchdog' "/proc/$old/cmdline" 2>/dev/null; then
+        log "another supervisor instance (pid $old) is running, exit"
+        exit 0
+    fi
+fi
+echo $$ > "$LOCK"
 
 log "supervisor v2 started (pid $$)"
 
