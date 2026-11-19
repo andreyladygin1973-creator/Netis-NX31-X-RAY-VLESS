@@ -61,12 +61,29 @@ quiet_logs() {
 # ---------- 3. DNS ----------
 
 dns_fallback() {
+    # https-dns-proxy при старте переносит текущий server-лист в doh_backup_server
+    # и ставит вместо него только свой адрес. Из-за этого добавленный заранее
+    # резерв (1.1.1.1) оказывается в бэкапе, и при падении DoH DNS умирает.
+    # Отключаем управление списком резолверов и держим его сами.
+    # 'none' — непустой sentinel: пустое значение config_get подменяет на '*'.
+    uci set https-dns-proxy.config.update_dnsmasq_config='none'
+    uci commit https-dns-proxy
+    /etc/init.d/https-dns-proxy restart >/dev/null 2>&1
+    sleep 2
+
+    uci set dhcp.@dnsmasq[0].noresolv='1'
+    uci -q del_list dhcp.@dnsmasq[0].server='127.0.0.1#5054'
+    uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#5054'
     uci -q del_list dhcp.@dnsmasq[0].server='1.1.1.1'
     uci add_list dhcp.@dnsmasq[0].server='1.1.1.1'
     uci set dhcp.@dnsmasq[0].strictorder='1'
+    # Убираем бэкап, который https-dns-proxy восстанавливает при каждом stop:
+    # без этих ключей скрипт не трогает наш список резолверов вообще.
+    uci -q delete dhcp.@dnsmasq[0].doh_backup_server
+    uci -q delete dhcp.@dnsmasq[0].doh_backup_noresolv
     if uci commit dhcp; then
         /etc/init.d/dnsmasq reload >/dev/null 2>&1
-        say "DNS: DoH первым, 1.1.1.1 как резерв"
+        say "DNS: DoH первым, 1.1.1.1 резервом (DoH не переписывает конфиг)"
     else
         say "DNS: uci commit не прошёл (нет места?)"
     fi

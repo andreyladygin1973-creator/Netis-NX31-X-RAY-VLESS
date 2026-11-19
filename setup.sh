@@ -41,7 +41,9 @@ echo "Creating https-dns-proxy config..."
 mkdir -p /etc/config
 cat > /etc/config/https-dns-proxy << 'EOF'
 config main 'config'
-        option update_dnsmasq_config '*'
+        # 'none' — непустой sentinel: пустое значение config_get подменяет на '*',
+        # а с '*' DoH забирает список резолверов себе и затирает резерв
+        option update_dnsmasq_config 'none'
         option force_dns '1'
         list force_dns_port '53'
         list force_dns_port '853'
@@ -208,12 +210,20 @@ cat > /etc/hotplug.d/iface/99-doh-fix << 'EOF'
 if [ "$ACTION" = "ifup" ]; then
     (
         sleep 5
+        # DoH не должен переписывать список резолверов dnsmasq
+        uci set https-dns-proxy.config.update_dnsmasq_config='none'
+        uci -q commit https-dns-proxy
         /etc/init.d/https-dns-proxy restart 2>/dev/null
-        
+
         # Используем UCI вместо sed
         uci set dhcp.@dnsmasq[0].noresolv='1'
         uci -q del_list dhcp.@dnsmasq[0].server='127.0.0.1#5054'
         uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#5054'
+        uci -q del_list dhcp.@dnsmasq[0].server='1.1.1.1'
+        uci add_list dhcp.@dnsmasq[0].server='1.1.1.1'
+        uci set dhcp.@dnsmasq[0].strictorder='1'
+        uci -q delete dhcp.@dnsmasq[0].doh_backup_server
+        uci -q delete dhcp.@dnsmasq[0].doh_backup_noresolv
         uci commit dhcp
         /etc/init.d/dnsmasq reload 2>/dev/null
     ) >/dev/null 2>&1 &
